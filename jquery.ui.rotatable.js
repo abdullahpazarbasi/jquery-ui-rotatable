@@ -1,8 +1,8 @@
 /**
  * jQuery UI Rotatable Widget
  *
- * @author Abdullah Pazarbasi <mail at abdullahpazarbasi dot com>
- * @licence MIT
+ * @author Abdullah Pazarbasi (https://github.com/abdullahpazarbasi/jquery-ui-rotatable)
+ * @license MIT
  *
  * Features:
  * Supports CSS 2D transform (only 2D)
