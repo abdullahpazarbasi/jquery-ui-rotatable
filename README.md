@@ -31,11 +31,13 @@ A jQuery UI Widget which rotates any element by using CSS transform rotate(). In
     $('#foo .bar').rotatable();
 
 
+----
 
 
     $('#foo .bar').resizable().rotatable().draggable();
 
 
+----
 
 
     $('#foo .bar').rotatable({ angle: 30 });
@@ -47,6 +49,7 @@ A jQuery UI Widget which rotates any element by using CSS transform rotate(). In
 
 ### Thanks
 Thanks to jQuery UI Development Team (https://jqueryui.com/about/)
+
 Thanks to Aidan Rogers (https://github.com/godswearhats/jquery-ui-rotatable)
 
 ### License
