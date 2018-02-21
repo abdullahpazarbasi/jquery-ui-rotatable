@@ -15,7 +15,7 @@
  *
  * Usages:
  * $('#foo .bar').rotatable();
- * $('#foo .bar').resizable().rotatable();
+ * $('#foo .bar').resizable().rotatable().draggable();
  * $('#foo .bar').rotatable({ angle: 30 });
  *
  * Inspired by jQuery UI Resizable Widget and Aidan Rogers's (godswearhats) jquery-ui-rotatable Widget
@@ -151,8 +151,9 @@ $.widget('ui.rotatable', $.ui.mouse, {
             };
         }
         // or
-        if (this.element.css('transform-origin') !== undefined) {
-            var origin = this.element.css('transform-origin').match(/([\d.]+)px +([\d.]+)px/);
+        var transformOrigin = this.element.css('transform-origin');
+        if (typeof transformOrigin === 'string') {
+            var origin = transformOrigin.match(/([\d.]+)px +([\d.]+)px/);
             if (origin !== null) {
                 return {
                     x: elementOffset.left + this._num(origin[1]),
@@ -180,32 +181,17 @@ $.widget('ui.rotatable', $.ui.mouse, {
     },
 
     _do: function (angle) {
-        if (this._isRotationOriginPositionGiven()) {
-            var transformOrigin = this._getRotationOriginPositionLeft() + 'px ' + this._getRotationOriginPositionTop() + 'px';
-            this.element.css('-webkit-transform-origin', transformOrigin);
-            this.element.css('-moz-transform-origin', transformOrigin);
-            this.element.css('-ms-transform-origin', transformOrigin);
-            this.element.css('transform-origin', transformOrigin);
-        }
+        var element = this.element;
         var oldAngle = null;
-        var currentTransform = this.element.css('-webkit-transform');
-        if (currentTransform === undefined || currentTransform === 'none') {
-            currentTransform = this.element.css('-moz-transform');
-            if (currentTransform === undefined || currentTransform === 'none') {
-                currentTransform = this.element.css('-ms-transform');
-                if (currentTransform === undefined || currentTransform === 'none') {
-                    currentTransform = this.element.css('-o-transform');
-                    if (currentTransform === undefined || currentTransform === 'none') {
-                        currentTransform = this.element.css('transform');
-                        if (currentTransform === undefined || currentTransform === 'none') {
-                            currentTransform = null;
-                        }
-                    }
-                }
-            }
+        var currentTransform = element.css('transform');
+        if (currentTransform === undefined) {
+            return;
+        }
+        if (this._isRotationOriginPositionGiven()) {
+            element.css('transform-origin', this._getRotationOriginPositionLeft() + 'px ' + this._getRotationOriginPositionTop() + 'px');
         }
         var newTransform = 'rotate(' + angle + 'deg) ';
-        if (currentTransform !== null) {
+        if (currentTransform !== 'none') {
             var regex = /matrix\((.*),(.*),(.*),(.*),(.*),(.*)\)/;
             var match = regex.exec(currentTransform);
             if (match !== null) {
@@ -215,8 +201,8 @@ $.widget('ui.rotatable', $.ui.mouse, {
                 var d = this._num(match[4]);
                 var e = this._num(match[5]);
                 var f = this._num(match[6]);
-                if (e != 0) {
-                    if (f == 0) {
+                if (e !== 0) {
+                    if (f === 0) {
                         newTransform += 'translate(' + e + 'px) ';
                     }
                     else {
@@ -226,29 +212,29 @@ $.widget('ui.rotatable', $.ui.mouse, {
                 var del = a * d - b * c;
                 var x = null;
                 var y = null;
-                if (a != 0 || b != 0) {
+                if (a !== 0 || b !== 0) {
                     var r = this._round(Math.sqrt(a * a + b * b), 5);
                     oldAngle = this._angleInDegrees(b > 0 ? Math.acos(a / r) : -Math.acos(a / r));
                     x = r;
                     y = this._round(del / r, 5);
-                    if (x != 1 || y != 1) {
+                    if (x !== 1 || y !== 1) {
                         newTransform += 'scale(' + x + (x === y ? '' : ', ' + y) + ') ';
                     }
                     x = Math.atan((a * c + b * d) / (r * r));
-                    if (x != 0) {
+                    if (x !== 0) {
                         newTransform += 'skewX(' + this._angleInDegrees(x) + 'deg) ';
                     }
                 }
-                else if (c != 0 || d != 0) {
+                else if (c !== 0 || d !== 0) {
                     var s = Math.sqrt(c * c + d * d);
                     oldAngle = this._angleInDegrees((Math.PI / 2) - (d > 0 ? Math.acos(-c / s) : -Math.acos(c / s)));
                     x = del / s;
                     y = s;
-                    if (x != 1 || y != 1) {
+                    if (x !== 1 || y !== 1) {
                         newTransform += 'scale(' + x + (x === y ? '' : ', ' + y) + ') ';
                     }
                     x = Math.atan((a * c + b * d) / (s * s));
-                    if (x != 0) {
+                    if (x !== 0) {
                         newTransform += 'skewY(' + this._angleInDegrees(x) + 'deg) ';
                     }
                 }
@@ -257,11 +243,7 @@ $.widget('ui.rotatable', $.ui.mouse, {
                 }
             }
         }
-        this.element.css('-webkit-transform', newTransform);
-        this.element.css('-moz-transform', newTransform);
-        this.element.css('-ms-transform', newTransform);
-        this.element.css('-o-transform', newTransform);
-        this.element.css('transform', newTransform);
+        element.css('transform', newTransform);
     },
 
     _create: function() {
