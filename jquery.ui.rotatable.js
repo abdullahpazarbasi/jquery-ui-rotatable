@@ -11,7 +11,8 @@
  * Compatible with other jQuery UI widgets included Draggable and Resizable
  * Compatible with Dave Furfero's jQuery UI Touch Punch
  * All angles in degrees
- * AlsoRotate extension
+ * "alsoRotate" extension (under construction)
+ * "animate" extension (under construction)
  *
  * Usages:
  * $('#foo .bar').rotatable();
@@ -289,6 +290,11 @@ $.widget('ui.rotatable', $.ui.mouse, {
             jqHandle.appendTo(this.element);
             this._disableSelection(jqHandle);
         }
+        //alert('top:' + jqHandle.css('top') + ' right:' + jqHandle.css('right') + ' bottom:' + jqHandle.css('bottom') + ' left:' + jqHandle.css('left'));
+        var top = jqHandle.css('top');
+        var right = jqHandle.css('right');
+        var bottom = jqHandle.css('bottom');
+        var left = jqHandle.css('left');
         if (jqHandle.css('position') !== 'absolute') {
             jqHandle.css('position', 'absolute');
         }
@@ -297,6 +303,12 @@ $.widget('ui.rotatable', $.ui.mouse, {
         }
         if (jqHandle.height() < 1) {
             jqHandle.height(9);
+        }
+        if (top === 'auto' && bottom === 'auto') {
+            jqHandle.css('top', '0px');
+        }
+        if (left === 'auto' && right === 'auto') {
+            jqHandle.css('left', '0px');
         }
         if (jqHandle.css('cursor') === 'auto') {
             jqHandle.css('cursor', 'grab');
@@ -483,6 +495,7 @@ $.ui.plugin.add('rotatable', 'alsoRotate', {
         $(o.alsoRotate).each(function () {
             var element = $(this);
             element.data('ui-rotatable-alsorotate', {});
+            // todo: complete here
         });
     },
 
@@ -491,11 +504,20 @@ $.ui.plugin.add('rotatable', 'alsoRotate', {
         $(o.alsoRotate).each(function () {
             var element = $(this);
             var start = element.data('ui-rotatable-alsorotate');
+            // todo: complete here
         });
     },
 
     stop: function () {
         $(this).removeData('ui-rotatable-alsorotate');
+    }
+
+});
+
+$.ui.plugin.add('rotatable', 'animate', {
+
+    stop: function () {
+        // todo: complete here
     }
 
 });
