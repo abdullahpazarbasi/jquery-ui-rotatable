@@ -1,21 +1,23 @@
-# jQuery UI Rotatable Widget
+# jQuery UI Rotatable Interaction
 ## jquery-ui-rotatable
 
 ### About
-A jQuery UI Widget which rotates any element by using CSS transform rotate(). Inspired by jQuery UI Resizable Widget and Aidan Rogers's (godswearhats) jquery-ui-rotatable Widget
+A jQuery UI Interaction which rotates any element by using CSS transform rotate(). Inspired by jQuery UI Resizable and Aidan Rogers's (godswearhats) jquery-ui-rotatable
 
 ### Features
 - Supports CSS 2D transforms (only 2D)
 - Rotation by mouse wheel
 - Rotation with/without handle
-- Compatible with other jQuery UI widgets included Draggable and Resizable
+- Compatible with other jQuery UI widgets and interactions included Draggable and Resizable
 - Compatible with Dave Furfero's jQuery UI Touch Punch
 - All angles in degrees
 - "alsoRotate" extension (under construction)
 - "animate" extension (under construction)
 
 ### Requirements
-- jQuery UI
+- jQuery UI Core
+- jQuery UI Core - Widget
+- jQuery UI Core - Mouse
 
 ### CDN
 .
