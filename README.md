@@ -15,9 +15,9 @@ A jQuery UI Interaction which rotates any element by using CSS transform rotate(
 - "animate" extension (under construction)
 
 ### Requirements
-- jQuery UI Core
-- jQuery UI Core - Widget
-- jQuery UI Core - Mouse
+- jQuery UI v1.9.2 Core
+- jQuery UI v1.9.2 Core - Widget
+- jQuery UI v1.9.2 Core - Mouse
 
 ### CDN
 .
