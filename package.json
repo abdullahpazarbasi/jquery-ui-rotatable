@@ -1,0 +1,24 @@
+{
+  "name": "jquery-ui-rotatable",
+  "version": "0.0.1",
+  "homepage": "https://github.com/abdullahpazarbasi/jquery-ui-rotatable",
+  "authors": [
+    "abdullahpazarbasi"
+  ],
+  "description": "A jQuery UI Widget which rotates any element by using CSS transform rotate().",
+  "browser": "jquery.ui.rotatable.js",
+  "main": "jquery.ui.rotatable.js",
+  "keywords": [
+    "jQuery",
+    "jQuery UI",
+    "jQuery Plugin",
+    "Rotate",
+    "Rotator",
+    "Rotation",
+    "CSS Transforms",
+    "Image Rotate",
+    "Image Rotator",
+    "Image Rotation"
+  ],
+  "license": "MIT"
+}
