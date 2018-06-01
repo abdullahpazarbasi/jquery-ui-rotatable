@@ -14,6 +14,12 @@
  * "alsoRotate" extension (under construction)
  * "animate" extension (under construction)
  *
+ * Classes:
+ * .ui-rotatable {}
+ * .ui-rotatable-rotating {}
+ * .ui-rotatable-rotated {}
+ * .ui-rotatable-handle {}
+ *
  * Usages:
  * $('#foo .bar').rotatable();
  * $('#foo .bar').resizable().rotatable().draggable();
@@ -67,7 +73,7 @@ $.widget('ui.rotatable', $.ui.mouse, {
     elementStartAngle: 0,
     elementCurrentAngle: 0,
     elementStopAngle: 0,
-    mouseStartAngle: 0,
+    mouseStartAngle: null,
 
     _num: function (value) {
         return parseFloat(value) || 0;
@@ -135,30 +141,31 @@ $.widget('ui.rotatable', $.ui.mouse, {
         return (typeof this.options.rotationOriginPosition.top === 'number') || (typeof this.options.rotationOriginPosition.left === 'number');
     },
 
-    _getRotationOriginPositionTop: function () {
+    getRotationOriginPositionTop: function (element) {
         if (typeof this.options.rotationOriginPosition.top === 'number') {
             return this.options.rotationOriginPosition.top;
         }
-        return Math.round(this.element.height() / 2);
+        return Math.round(element.height() / 2);
     },
 
-    _getRotationOriginPositionLeft: function () {
+    getRotationOriginPositionLeft: function (element) {
         if (typeof this.options.rotationOriginPosition.left === 'number') {
             return this.options.rotationOriginPosition.left;
         }
-        return Math.round(this.element.width() / 2);
+        return Math.round(element.width() / 2);
     },
 
     _calculateOrigin: function () {
+        var element = this.element;
         var elementOffset = this._getElementOffset();
         if (this._isRotationOriginPositionGiven()) {
             return {
-                x: elementOffset.left + this._getRotationOriginPositionLeft(),
-                y: elementOffset.top + this._getRotationOriginPositionTop()
+                x: elementOffset.left + this.getRotationOriginPositionLeft(element),
+                y: elementOffset.top + this.getRotationOriginPositionTop(element)
             };
         }
         // or
-        var transformOrigin = this.element.css('transform-origin');
+        var transformOrigin = element.css('transform-origin');
         if (typeof transformOrigin === 'string') {
             var origin = transformOrigin.match(/([\d.]+)px +([\d.]+)px/);
             if (origin !== null) {
@@ -170,15 +177,15 @@ $.widget('ui.rotatable', $.ui.mouse, {
         }
         // or
         return {
-            x: elementOffset.left + Math.round(this.element.width() / 2),
-            y: elementOffset.top + Math.round(this.element.height() / 2)
+            x: elementOffset.left + Math.round(element.width() / 2),
+            y: elementOffset.top + Math.round(element.height() / 2)
         };
     },
 
     _calculateRotationAngleViaMousePosition: function (event) {
         var origin = this._calculateOrigin();
         var mouseAngle = this._calculateMouseAngle(event, origin);
-        var rotationAngle = mouseAngle - this.mouseStartAngle + this.elementStartAngle;
+        var rotationAngle = mouseAngle - this._num(this.mouseStartAngle) + this.elementStartAngle;
         if (this.options.snap) {
             rotationAngle = this._calculateSnap(rotationAngle);
         }
@@ -198,7 +205,7 @@ $.widget('ui.rotatable', $.ui.mouse, {
             return 0;
         }
         if (this._isRotationOriginPositionGiven()) {
-            element.css('transform-origin', this._getRotationOriginPositionLeft() + 'px ' + this._getRotationOriginPositionTop() + 'px');
+            element.css('transform-origin', this.getRotationOriginPositionLeft(element) + 'px ' + this.getRotationOriginPositionTop(element) + 'px');
         }
         var newTransform = 'rotate(' + angle + 'deg) ';
         if (currentTransform !== 'none') {
@@ -264,13 +271,13 @@ $.widget('ui.rotatable', $.ui.mouse, {
 
     _create: function() {
         var o = this.options;
+        this.handlers = {
+            _mouseWheel: $.proxy(this._mouseWheel, this)
+        };
         this.element.addClass('ui-rotatable');
         if (o.handle) {
             this._placeHandle();
         }
-        this.handlers = {
-            _mouseWheel: $.proxy(this._mouseWheel, this)
-        };
         if (o.wheel) {
             this.element.bind('wheel', this.handlers._mouseWheel);
         }
@@ -281,9 +288,9 @@ $.widget('ui.rotatable', $.ui.mouse, {
 
     _destroy: function () {
         this._mouseDestroy();
-        this.element.removeClass('ui-rotatable');
+        this.element.removeClass('ui-rotatable ui-rotatable-rotating ui-rotatable-rotated');
         this.element.off('rotatable');
-        this.element.find('.ui-rotatable-handle:first').remove();
+        this.element.find('.ui-rotatable-handle').remove();
         if (this.options.wheel) {
             this.element.unbind('wheel', this.handlers._mouseWheel);
         }
@@ -291,7 +298,7 @@ $.widget('ui.rotatable', $.ui.mouse, {
 
     _placeHandle: function () {
         var o = this.options;
-        if (!this.element) {
+        if (!this.element || this.element.disabled || o.disabled) {
             return;
         }
         if (!this._canBeParent()) {
@@ -329,6 +336,10 @@ $.widget('ui.rotatable', $.ui.mouse, {
         }
     },
 
+    _displaceHandle: function () {
+        //
+    },
+
     _getJqHandle: function () {
         var o = this.options;
         if (o.handle) {
@@ -362,6 +373,9 @@ $.widget('ui.rotatable', $.ui.mouse, {
 
     _mouseStart: function (event) { // event handler
         var element = this.element;
+        if (!element || element.disabled || this.options.disabled) {
+            return false;
+        }
         var jqHandle = this._getJqHandle();
         var origin = this._calculateOrigin();
         this.mouseStartAngle = this._calculateMouseAngle(event, origin);
@@ -379,8 +393,8 @@ $.widget('ui.rotatable', $.ui.mouse, {
     },
 
     _mouseDrag: function (event, originalUi) { // event handler
-        var element = this.element, o = this.options;
-        if (!element || element.disabled || o.disabled) {
+        var element = this.element;
+        if (!element || element.disabled || this.options.disabled) {
             return false;
         }
         var rotationAngle = this._calculateRotationAngleViaMousePosition(event);
@@ -400,7 +414,7 @@ $.widget('ui.rotatable', $.ui.mouse, {
 
     _mouseStop: function (event) { // event handler
         var element = this.element;
-        if (!element) {
+        if (!element || element.disabled || this.options.disabled) {
             return false;
         }
         this.elementStopAngle = this.elementCurrentAngle;
@@ -414,6 +428,7 @@ $.widget('ui.rotatable', $.ui.mouse, {
         var ui = this.ui();
         $.ui.plugin.call(this, 'stop', [ event, ui ]); // calling extension methods
         this._trigger('stop', event, ui); // calling callback
+        this.mouseStartAngle = null;
         return false;
     },
 
@@ -475,10 +490,35 @@ $.widget('ui.rotatable', $.ui.mouse, {
         if (handle === undefined) {
             return o.handle;
         }
-        o.handle = handle;
-        if (o.handle) {
-            this._placeHandle();
+        if (handle) {
+            if (!o.handle) {
+                this._placeHandle();
+            }
         }
+        else {
+            if (o.handle) {
+                this._displaceHandle();
+            }
+        }
+        o.handle = handle;
+    },
+
+    wheel: function (wheel) {
+        var element = this.element, o = this.options;
+        if (wheel === undefined) {
+            return o.wheel;
+        }
+        if (wheel) {
+            if (!o.wheel) {
+                element.bind('wheel', this.handlers._mouseWheel);
+            }
+        }
+        else {
+            if (o.wheel) {
+                element.unbind('wheel', this.handlers._mouseWheel);
+            }
+        }
+        o.wheel = wheel;
     },
 
     handleElementSelector: function (handleElementSelector) { // accessor
@@ -486,6 +526,10 @@ $.widget('ui.rotatable', $.ui.mouse, {
         if (handleElementSelector === undefined) {
             return o.handleElementSelector;
         }
+        if (o.handleElementSelector === handleElementSelector) {
+            return;
+        }
+        this._displaceHandle();
         o.handleElementSelector = handleElementSelector;
         if (o.handle) {
             this._placeHandle();
@@ -503,6 +547,10 @@ $.widget('ui.rotatable', $.ui.mouse, {
         if (typeof position.left === 'number') {
             o.rotationOriginPosition.left = position.left;
         }
+    },
+
+    currentAngle: function () {
+        return this.elementCurrentAngle;
     },
 
     ui: function () {
@@ -535,8 +583,7 @@ $.ui.plugin.add('rotatable', 'alsoRotate', {
         var instance = $(this).rotatable('instance'), o = instance.options;
         $(o.alsoRotate).each(function () {
             var element = $(this);
-            element.data('ui-rotatable-alsorotate', {});
-            // todo: complete here
+            // do nothing
         });
     },
 
@@ -544,14 +591,12 @@ $.ui.plugin.add('rotatable', 'alsoRotate', {
         var instance = $(this).rotatable('instance'), o = instance.options;
         $(o.alsoRotate).each(function () {
             var element = $(this);
-            var start = element.data('ui-rotatable-alsorotate');
             instance.perform(element, instance.elementCurrentAngle);
-            // todo: complete here
         });
     },
 
     stop: function (event, ui) {
-        $(this).removeData('ui-rotatable-alsorotate');
+        // do nothing
     }
 
 });
