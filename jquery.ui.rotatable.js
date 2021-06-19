@@ -49,7 +49,7 @@ $.widget('ui.rotatable', $.ui.mouse, {
         delay: 0,
         disabled: false,
         alsoRotate: false,
-        angle: 0,
+        angle: undefined,
         handle: true,
         handleElementSelector: '<div></div>',
         rotationOriginPosition: {
@@ -207,7 +207,7 @@ $.widget('ui.rotatable', $.ui.mouse, {
         if (this._isRotationOriginPositionGiven()) {
             element.css('transform-origin', this.getRotationOriginPositionLeft(element) + 'px ' + this.getRotationOriginPositionTop(element) + 'px');
         }
-        var newTransform = 'rotate(' + angle + 'deg) ';
+        var newTransform = '';
         if (currentTransform !== 'none') {
             var regex = /matrix\((.*),(.*),(.*),(.*),(.*),(.*)\)/;
             var match = regex.exec(currentTransform);
@@ -232,6 +232,9 @@ $.widget('ui.rotatable', $.ui.mouse, {
                 if (a !== 0 || b !== 0) {
                     var r = this._round(Math.sqrt(a * a + b * b), 5);
                     oldAngle = this._angleInDegrees(b > 0 ? Math.acos(a / r) : -Math.acos(a / r));
+                    if (angle === undefined) {
+                        angle = oldAngle;
+                    }
                     x = r;
                     y = this._round(del / r, 5);
                     if (x !== 1 || y !== 1) {
@@ -245,6 +248,9 @@ $.widget('ui.rotatable', $.ui.mouse, {
                 else if (c !== 0 || d !== 0) {
                     var s = Math.sqrt(c * c + d * d);
                     oldAngle = this._angleInDegrees((Math.PI / 2) - (d > 0 ? Math.acos(-c / s) : -Math.acos(c / s)));
+                    if (angle === undefined) {
+                        angle = oldAngle;
+                    }
                     x = del / s;
                     y = s;
                     if (x !== 1 || y !== 1) {
@@ -260,13 +266,16 @@ $.widget('ui.rotatable', $.ui.mouse, {
                 }
             }
         }
+        angle = this._calculateAbsoluteAngle(this._num(angle));
+        newTransform += 'rotate(' + angle + 'deg) ';
+        
         element.css('transform', newTransform);
         return angle;
     },
 
     _angle: function (angle) {
-        this.elementCurrentAngle = this._calculateAbsoluteAngle(this._num(angle));
-        return this.perform(this.element, this.elementCurrentAngle);
+        this.elementCurrentAngle = this.perform(this.element, angle);
+        return  this.elementCurrentAngle;   
     },
 
     _create: function() {
